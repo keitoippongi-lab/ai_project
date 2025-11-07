@@ -3,19 +3,39 @@ import folium
 from streamlit_folium import st_folium
 
 # -------------------------------
-# 서울 주요 관광지 Top 10 좌표
+# 관광지 데이터 (좌표, 설명, 가까운 지하철역)
 # -------------------------------
 locations = [
-    {"name": "경복궁", "lat": 37.5778, "lon": 126.9769},
-    {"name": "N서울타워", "lat": 37.5512, "lon": 126.9882},
-    {"name": "명동", "lat": 37.5631, "lon": 126.9882},
-    {"name": "북촌한옥마을", "lat": 37.5824, "lon": 126.9857},
-    {"name": "인사동", "lat": 37.5740, "lon": 126.9896},
-    {"name": "청계천", "lat": 37.5706, "lon": 126.9770},
-    {"name": "롯데월드타워", "lat": 37.5123, "lon": 127.1021},
-    {"name": "동대문디자인플라자(DDP)", "lat": 37.5660, "lon": 127.0098},
-    {"name": "서울숲", "lat": 37.5444, "lon": 127.0390},
-    {"name": "한강공원", "lat": 37.5200, "lon": 126.9430}
+    {"name": "경복궁", "lat": 37.5778, "lon": 126.9769,
+     "desc": "조선 시대의 대표 궁궐로, 한국 전통 건축의 아름다움을 느낄 수 있는 곳입니다.",
+     "subway": "경복궁역 (3호선)"},
+    {"name": "N서울타워", "lat": 37.5512, "lon": 126.9882,
+     "desc": "남산 위에 위치한 서울의 랜드마크 전망대로, 야경 명소로 유명합니다.",
+     "subway": "명동역 (4호선)"},
+    {"name": "명동", "lat": 37.5631, "lon": 126.9882,
+     "desc": "쇼핑과 길거리 음식으로 유명한 서울의 대표적인 번화가입니다.",
+     "subway": "명동역 (4호선)"},
+    {"name": "북촌한옥마을", "lat": 37.5824, "lon": 126.9857,
+     "desc": "전통 한옥이 잘 보존된 마을로, 한국의 옛 정취를 느낄 수 있습니다.",
+     "subway": "안국역 (3호선)"},
+    {"name": "인사동", "lat": 37.5740, "lon": 126.9896,
+     "desc": "한국 전통 공예품, 찻집, 갤러리가 모여 있는 문화거리입니다.",
+     "subway": "안국역 (3호선)"},
+    {"name": "청계천", "lat": 37.5706, "lon": 126.9770,
+     "desc": "도심 속에서 여유를 즐길 수 있는 복원된 하천 산책로입니다.",
+     "subway": "종각역 (1호선)"},
+    {"name": "롯데월드타워", "lat": 37.5123, "lon": 127.1021,
+     "desc": "세계 5위 높이의 초고층 빌딩으로, 전망대와 쇼핑몰이 함께 있습니다.",
+     "subway": "잠실역 (2호선, 8호선)"},
+    {"name": "동대문디자인플라자(DDP)", "lat": 37.5660, "lon": 127.0098,
+     "desc": "서울의 대표적인 현대 건축물로, 전시와 패션행사가 자주 열립니다.",
+     "subway": "동대문역사문화공원역 (2, 4, 5호선)"},
+    {"name": "서울숲", "lat": 37.5444, "lon": 127.0390,
+     "desc": "넓은 녹지와 예쁜 산책길로 유명한 도심 속 자연공원입니다.",
+     "subway": "서울숲역 (수인분당선)"},
+    {"name": "한강공원", "lat": 37.5200, "lon": 126.9430,
+     "desc": "서울 시민들이 가장 사랑하는 야외 휴식 공간으로, 자전거와 피크닉 명소입니다.",
+     "subway": "여의나루역 (5호선)"}
 ]
 
 # -------------------------------
@@ -24,32 +44,41 @@ locations = [
 st.set_page_config(page_title="서울 관광지도", layout="wide")
 
 st.title("🗺️ 서울 주요 관광지 Top 10")
-st.markdown("서울을 방문하는 외국인들이 가장 좋아하는 관광지 10곳을 지도에 표시했습니다.")
+st.markdown("외국인들이 가장 사랑하는 서울의 인기 명소를 한눈에 볼 수 있는 지도입니다.")
 
 # -------------------------------
 # 폴리움 지도 생성
 # -------------------------------
-m = folium.Map(location=[37.5665, 126.9780], zoom_start=12)
+m = folium.Map(location=[37.5665, 126.9780], zoom_start=12, tiles="CartoDB positron")
 
-# 관광지 마커 + 폴리곤 추가
-for loc in locations:
+# 관광지 마커 추가 (더 눈에 띄는 디자인)
+for i, loc in enumerate(locations, start=1):
+    popup_html = f"""
+    <b>{i}. {loc['name']}</b><br>
+    📍 <b>가장 가까운 지하철역:</b> {loc['subway']}<br>
+    ℹ️ {loc['desc']}
+    """
     folium.Marker(
         location=[loc["lat"], loc["lon"]],
-        popup=folium.Popup(f"<b>{loc['name']}</b>", max_width=200),
-        icon=folium.Icon(color="blue", icon="info-sign")
-    ).add_to(m)
-
-    # 각 관광지 주변 원형 표시
-    folium.Circle(
-        location=[loc["lat"], loc["lon"]],
-        radius=300,  # 반경 300m
-        color='crimson',
-        fill=True,
-        fill_color='crimson',
-        fill_opacity=0.2
+        popup=folium.Popup(popup_html, max_width=300),
+        icon=folium.Icon(color="red", icon="star")
     ).add_to(m)
 
 # -------------------------------
 # 스트림릿에 지도 표시
 # -------------------------------
 st_folium(m, width=900, height=600)
+
+# -------------------------------
+# 지도 아래에 설명 표시
+# -------------------------------
+st.markdown("## 📖 관광지 설명 및 지하철역 정보")
+
+for i, loc in enumerate(locations, start=1):
+    st.markdown(f"""
+    ### {i}. {loc['name']}
+    - **가까운 지하철역:** {loc['subway']}
+    - **유명한 이유:** {loc['desc']}
+    """)
+
+st.info("💡 Tip: 마커를 클릭하면 관광지 설명과 지하철 정보를 팝업으로 볼 수 있습니다.")
